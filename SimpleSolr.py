@@ -29,9 +29,12 @@ class _SimpleSolr(object):
     # @todo make plugable 
     self.methods = {
         'fq': lambda x: store_all('fq',x),
-        'q': lambda x: store_all('q',x),
+        'fl': lambda x: store_all('fl',x),
+        'q': lambda x: store_one('q',x),
+        'df': lambda x: store_one('df',x),
         'rows': lambda x: store_one('rows',x),
         'start': lambda x: store_one('start',x),
+        'sort': lambda x: store_one('sort',x),
         }
     
 
