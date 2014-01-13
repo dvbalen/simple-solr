@@ -5,23 +5,21 @@ import json
 import urllib.parse
 import urllib.request
 
-version = '0.3'
+version = '0.4'
 
-def solr_select(url,path):
-  return _SimpleSolr(url,path,'solr','select','dismax')
+def select(url,core):
+  return _SimpleSolr(url,core,'solr','select')
 
 def geturl(url):
   return urllib.request.urlopen(url).read().decode('utf-8')
 
 class _SimpleSolr(object):
 
-  # @todo request_handler doesn't do anything
-  def __init__(self,url,core,handler_path='solr',handler_name='select',request_handler='dismax'):
+  def __init__(self,url,core,handler_path='solr',handler_name='select'):
     self.url = url.rstrip('/')
     self.core = core.rstrip('/')
     self.handler_path = handler_path.rstrip('/')
     self.handler_name = handler_name
-    self.request_handler = request_handler
     self.data = {}
     self.block_start = None
     self.cached_block = iter([])
@@ -49,7 +47,7 @@ class _SimpleSolr(object):
     
 
   def __copy__(self):
-    new_self = _SimpleSolr(self.url,self.core,self.handler_path,self.handler_name,self.request_handler)
+    new_self = _SimpleSolr(self.url,self.core,self.handler_path,self.handler_name)
     new_self.data = dict(self.data)
     return new_self
 
@@ -104,10 +102,12 @@ class _SimpleSolr(object):
     self.block_start += len(resp['response']['docs'])
     self.cached_block = iter(resp['response']['docs'])
     self.cached_resp = resp
-    print(resp)
     return resp['response']['numFound']
 
 
 if __name__ == "__main__":
-  q = SimpleSolr('http://localhost:8983','core0')
-  print(q)
+  local_solr = select('http://localhost:8983','core0')
+  all_rows = local_solr.q('*:*')
+  print(all_rows)
+  for row in all_rows:
+    print(row)
