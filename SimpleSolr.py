@@ -5,6 +5,8 @@ import json
 import urllib.parse
 import urllib.request
 
+version = '0.3'
+
 def solr_select(url,path):
   return _SimpleSolr(url,path,'solr','select','dismax')
 
