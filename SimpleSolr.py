@@ -1,10 +1,15 @@
 
 
 import copy
+import json
 import urllib.parse
+import urllib.request
 
 def solr_select(url,path):
   return _SimpleSolr(url,path,'solr','select','dismax')
+
+def geturl(url):
+  return urllib.request.urlopen(url).read().decode('utf-8')
 
 class _SimpleSolr(object):
 
@@ -16,6 +21,9 @@ class _SimpleSolr(object):
     self.handler_name = handler_name
     self.request_handler = request_handler
     self.data = {}
+    self.block_start = None
+    self.cached_block = iter([])
+    self.cached_resp = {}
 
     def store_one(key,item):
       self.data[key] = [item]
@@ -56,18 +64,48 @@ class _SimpleSolr(object):
       return self._store(name)
     raise AttributeError("'%s' has no attribute '%s'" % (self.__class__,name) )
 
-  def get_query(self):
+  def __str__(self):
     path = [ '/'.join([self.url,self.handler_path,self.core,self.handler_name]), ]
     params = []
     for k,v in self.data.items():
       kv_lst = zip([k]*len(v),v)
       params.extend(l for l in kv_lst)
+    params.append(('wt','json'))
     if params:
       path.extend(['?',urllib.parse.urlencode(params)])
     return ''.join(path)
 
-q = solr_select('http://localhost:8983','core1')
+  def __iter__(self):
+    self.block_start = 0
+    return self
+
+  def __next__(self):
+    try:
+      r = next(self.cached_block)
+    except StopIteration:
+      if self._get_block():
+        r = next(self.cached_block)
+      else:
+        raise
+    return r
+
+
+  def _get_block(self):
+    if not self.block_start:
+      start = self.data.get('start',[0])[0]
+    else:
+      start = self.block_start
+    q_str = str(self.start(start))
+    resp = json.loads(geturl(q_str))
+    #if resp['responseHeader']['status'] != 0
+    #   raise SolrError
+    self.block_start += len(resp['response']['docs'])
+    self.cached_block = iter(resp['response']['docs'])
+    self.cached_resp = resp
+    print(resp)
+    return resp['response']['numFound']
+
 
 if __name__ == "__main__":
-  q = SimpleSolr('http://localhost:8983','core1')
-  print(q.get_query())
+  q = SimpleSolr('http://localhost:8983','core0')
+  print(q)
