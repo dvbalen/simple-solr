@@ -99,7 +99,7 @@ class _SimpleSolr(object):
     resp = json.loads(geturl(q_str))
     #if resp['responseHeader']['status'] != 0
     #   raise SolrError
-    self.block_start += len(resp['response']['docs'])
+    self.block_start = start + len(resp['response']['docs'])
     self.cached_block = iter(resp['response']['docs'])
     self.cached_resp = resp
     return resp['response']['numFound']
