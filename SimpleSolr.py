@@ -77,7 +77,8 @@ class _SimpleSolr(object):
     q_str = str(self.rows(0))
     resp = json.loads(geturl(q_str))
     try:
-      l = resp['response']['numFound']
+      l = int(resp['response']['numFound'])
+      l -= self.data.get('start',[0])[0]
     except KeyError:
       l = None
     return l
