@@ -44,7 +44,6 @@ class _SimpleSolr(object):
         'start': lambda x: store_one('start',x),
         'sort': lambda x: store_one('sort',x),
         }
-    
 
   def __copy__(self):
     new_self = _SimpleSolr(self.url,self.core,self.handler_path,self.handler_name)
@@ -57,7 +56,6 @@ class _SimpleSolr(object):
       new_self.methods[name](*args,**kwargs)
       return new_self
     return _ret
-
 
   def __getattr__(self,name):
     if name in self.methods:
@@ -75,6 +73,15 @@ class _SimpleSolr(object):
       path.extend(['?',urllib.parse.urlencode(params)])
     return ''.join(path)
 
+  def __len__(self):
+    q_str = str(self.rows(0))
+    resp = json.loads(geturl(q_str))
+    try:
+      l = resp['response']['numFound']
+    except KeyError:
+      l = None
+    return l
+
   def __iter__(self):
     self.block_start = 0
     return self
@@ -88,7 +95,6 @@ class _SimpleSolr(object):
       else:
         raise
     return r
-
 
   def _get_block(self):
     if not self.block_start:
@@ -104,6 +110,7 @@ class _SimpleSolr(object):
     self.cached_resp = resp
     return resp['response']['numFound']
 
+#q = select('http://localhost:8983','core0')
 
 if __name__ == "__main__":
   local_solr = select('http://localhost:8983','core0')
