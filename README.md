@@ -20,6 +20,7 @@ And place `SimpleSolr.py` somewhere in your python library path
 Usage
 -----
 
+Create a solr object an iterate over a query:
 ```python
  >>> import SimpleSolr
  >>>
@@ -27,12 +28,30 @@ Usage
  >>> for row in local_core0.q(*:*):
  ...   print(row) 
  ... 
- {'compName_s': 'Maxtor Corporation', 'id': 'maxtor', 'address_s': '920 Disc Drive Scotts Valley, CA 95066', '_version_': 1456990903946182656}
-(...)
- {'compName_s': 'Samsung Electronics Co. Ltd.', 'id': 'samsung', 'address_s': '105 Challenger Rd. Ridgefield Park, NJ 07660-0511', '_version_': 1456990903946182657}
+{'_version_': 1456990903946182656,
+ 'address_s': '920 Disc Drive Scotts Valley, CA 95066',
+ 'compName_s': 'Maxtor Corporation',
+ 'id': 'maxtor'}
+{'_version_': 1456990903946182657,
+ 'address_s': '105 Challenger Rd. Ridgefield Park, NJ 07660-0511',
+ 'compName_s': 'Samsung Electronics Co. Ltd.',
+ 'id': 'samsung'}
+{'_version_': 1456990903947231232,
+ 'address_s': '381 Brea Canyon Road Walnut, CA 91789-0708',
+ 'compName_s': 'ViewSonic Corp',
+ 'id': 'viewsonic'}
+ >>>
+```
+
+Get the Solr query:
+```python
  >>> str(local_core0.q('*:*').start(9))
  'http://localhost:8983/solr/core0/select?q=%2A%3A%2A&start=9&wt=json'
  >>> 
+```
+
+Solr queries are just iterators:
+```python
  >>> ids_q = local_core.q('*:*').fl('id')
  >>> ids = [ r['id'] for id in ids_q ]
  >>> import pprint
