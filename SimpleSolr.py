@@ -1,17 +1,58 @@
+'''
+Use Solr's API from Python with the tedious parts taken care of.
 
+Create a query object that has a fluent (JQuery style) interface mimicking the Solr API. 
+The object is an iterator over the results of the query.
+
+>>> import SimpleSolr
+>>> q = SimpleSolr.select('http://localhost:8983','core0')
+>>> for r in q.q('*:*').fl('id'):
+...   r['id']
+'''
+
+from __future__ import print_function
 
 import copy
 import json
-import urllib.parse
-import urllib.request
+import os.path
+import sys
 
-version = '0.4'
+version = '0.5'
 
 def select(url,core):
   return _SimpleSolr(url,core,'solr','select')
 
-def geturl(url):
-  return urllib.request.urlopen(url).read().decode('utf-8')
+
+# Stuff that is python 2/3 specific.... @todo to be refactored into a file
+
+if sys.hexversion > 0x03000000:
+  from urllib.parse import urlencode
+  import urllib.request
+
+  def solr_parseurl(url,is_multicore=True):
+    url_p = urllib.parse.urlparse(url)
+    solr_url = url_p.scheme+'://'+url_p.netloc
+    (path,solr_handler) =  os.path.split(url_p.path)
+    (solr_path,solr_core) =  os.path.split(path)
+    solr_query = urllib.parse.parse_qsl(url_p.query)
+    res = [solr_url,solr_path,solr_core,solr_handler,solr_query]
+    return res
+
+  def geturl(url):
+    return urllib.request.urlopen(url).read().decode('utf-8')
+
+else:
+  import urllib2
+  from urllib import urlencode
+
+  def solr_parseurl(url,is_multicore=True):
+    pass
+
+  def geturl(url):
+    return urllib2.urlopen(url).read()
+
+
+#### End refactor
 
 class _SimpleSolr(object):
 
@@ -70,7 +111,7 @@ class _SimpleSolr(object):
       params.extend(l for l in kv_lst)
     params.append(('wt','json'))
     if params:
-      path.extend(['?',urllib.parse.urlencode(params)])
+      path.extend(['?',urlencode(params)])
     return ''.join(path)
 
   def __len__(self):
@@ -96,6 +137,9 @@ class _SimpleSolr(object):
       else:
         raise
     return r
+
+  # For python2 compatability
+  next = __next__
 
   def _get_block(self):
     if not self.block_start:

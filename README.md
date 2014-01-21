@@ -1,10 +1,11 @@
 Simple Solr
 ===========
 
-A python client for Solr queries that tries to automate the tedious parts while providing a familiar interface.  
+Use Solr's API from Python with the tedious parts taken care of.
 
-Looking at the options out there seems to require learning a whole new Api. But building query URLs by hand and keeping track of `start` and `rows` was tedious and error prone. This library provides fluent interface (JQuery style) that mimics Solr parameter names. It also takes car of pulling data behind the scenes.
+The options out there seem to require learning a whole new Api and object hirearchy. But building query URLs by hand and keeping track of `start` and `rows` was tedious and error prone. This library provides fluent interface (JQuery style) that mimics Solr parameter names. It also takes car of pulling data behind the scenes.
 
+Supports python 2 and 3 (most likely 2.6+)
 
 Installation
 ------------
@@ -80,7 +81,6 @@ TODO(?)
 ----
 
  * Package
- * Python2 port
  * Test suite
  * Facet query support
  * Less common parameters (dismax,edismax,etc)
